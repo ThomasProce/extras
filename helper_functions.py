@@ -227,6 +227,26 @@ def plot_confusion_matrix(y_true, y_pred):
     plt.xlabel('Predicted')
     plt.ylabel('Actual')
     plt.title('Confusion Matrix')
-
     # Show the plot
     plt.show()
+    
+def unzip_data(filename):
+    
+    """
+    Extracts the contents of a zip file.
+
+    Args:
+        filename (str): The name of the zip file.
+
+    Returns:
+        None
+        
+    Notes: in Colab remember to use !wget to download the zip file first
+    and after that unzip it.
+    """
+    
+    import zipfile
+    zip_ref = zipfile.ZipFile(filename, 'r')
+    zip_ref.extractall()
+    zip_ref.close()
+    
