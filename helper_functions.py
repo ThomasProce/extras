@@ -12,6 +12,20 @@ Usage:
 You can import and use the functions in this module as follows:
 
 """
+# ALL DEPENDENCIES
+
+import os
+import random
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+import tensorflow as tf
+import numpy as np
+import requests
+import seaborn as sns
+from sklearn.metrics import confusion_matrix
+import tensorflow_hub as hub
+
+
 # PLOTTING FUCTIONS
 
 def plot_random_sample(directory):
