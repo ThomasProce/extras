@@ -136,28 +136,59 @@ def plot_curves(history,name_model):
     plt.tight_layout()
     plt.show()
 
-def plot_samples(dir):
+import os
+import random
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+import math
+
+def plot_random_images(N, directory):
     
     """
-    Generates a plot of 6 randomly selected images from a specified directory.
-    
-    Args:
-        dir (str): The path to the directory containing the images.
-        
+    Plots N random images from the specified directory.
+
+    Parameters:
+        N (int): The number of random images to plot.
+        directory (str): The directory to search for image files.
+
     Returns:
         None
     """
     
-    for i in range(6):
-        plt.subplot(2,3,i+1)
-        sample = dir + '/'+ np.random.choice(os.listdir(dir))
-        img = plt.imread(sample)
-        plt.imshow(img)
-        plt.axis('off')
-        # set the shape of the image as title
-        plt.title(f"Shape: {img.shape}")
-        # set a subtitle for the class of the image
-        plt.suptitle(dir.split('/')[-1])
+    # Get a list of image files in the specified directory and its subdirectories
+    image_files = []
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            if file.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp')):
+                image_files.append((os.path.join(root, file), root))
+
+    if not image_files:
+        print("No image files found in the specified directory.")
+        return
+
+    # Randomly select N unique images
+    selected_images = random.sample(image_files, N)
+
+    # Calculate the number of rows and columns for subplots
+    num_rows = math.ceil(N / 5)
+    num_cols = min(N, 5)
+
+    # Create subplots for displaying the selected images
+    fig, axes = plt.subplots(num_rows, num_cols, figsize=(15, 5))
+    axes = axes.ravel()  # Flatten the 2D array of axes
+
+    for i, (image_path, subdirectory) in enumerate(selected_images):
+        ax = axes[i]
+        img = mpimg.imread(image_path)
+        ax.imshow(img)
+        ax.axis('off')
+        # Set the title with the shape and name of the subdirectory
+        ax.set_title(f"Shape: {img.shape}\nSubdirectory: {os.path.basename(subdirectory)}")
+
+    # Hide any empty subplots
+    for i in range(N, num_rows * num_cols):
+        fig.delaxes(axes[i])
+
     plt.tight_layout()
     plt.show()
     
