@@ -212,6 +212,180 @@ def plot_decision_bn(model,X,y):
     plt.xlim(xx.min(),xx.max())
     plt.ylim(yy.min(),yy.max())
     
+
+def plot_confusion_matrix(y_true, y_pred,
+                          class_names,
+                          figsize=(12, 10),
+                          fontsize=8,
+                          text_rotation=45,
+                          normalize=False,
+                          save_filename=None):
+    """
+    This function prints and plots the confusion matrix.
+    Normalization can be applied by setting `normalize=True`.
+
+    """
+    cm = confusion_matrix(y_true, y_pred)
+
+    if normalize:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        fmt = '.2f'
+    else:
+        fmt = 'd'
+
+    plt.figure(figsize=figsize)
+    sns.heatmap(cm, annot=True, fmt=fmt, cmap="Blues", xticklabels=class_names, yticklabels=class_names)
+
+    plt.xlabel('Predicted', fontsize=fontsize)
+    plt.ylabel('True', fontsize=fontsize)
+    plt.xticks(rotation=text_rotation)
+
+
+
+    if normalize:
+        plt.title('Normalized Confusion Matrix', fontsize=fontsize)
+    else:
+        plt.title('Confusion Matrix', fontsize=fontsize)
+
+    if save_filename:
+        plt.savefig(save_filename, bbox_inches='tight')
+    else:
+        plt.tight_layout()
+        plt.show()
+        
+def compare_histories(original_history, new_history, initial_epochs=5):
+    
+    """
+    Compare and visualize two TensorFlow model training histories using a detailed plot.
+
+    This function takes two TensorFlow model History objects, typically representing the training histories of a model
+    before and after fine-tuning. It combines these histories and creates a stylish plot to compare and visualize
+    training and validation metrics, including accuracy and loss, before and after fine-tuning.
+
+    Args:
+    original_history (tf.keras.callbacks.History): The training history of the original model.
+    new_history (tf.keras.callbacks.History): The training history of the fine-tuned model.
+    initial_epochs (int, optional): The number of initial training epochs before fine-tuning (default is 5).
+
+    Returns:
+    None: Displays the comparison plot.
+
+    Example Usage:
+    compare_histories(original_history, fine_tuned_history, initial_epochs=5)
+
+    The function compares the training and validation metrics (accuracy and loss) between the original and fine-tuned
+    models. It visually shows the effects of fine-tuning on the model's performance and helps assess the impact of
+    changes made during the fine-tuning process.
+
+    The resulting plot offers insights into the impact of fine-tuning on your model's performance.
+
+    Note:
+    Make sure to provide valid TensorFlow History objects for 'original_history' and 'new_history'.
+    """
+    
+    # Get original history measurements
+    acc = original_history.history["accuracy"]
+    loss = original_history.history["loss"]
+
+    val_acc = original_history.history["val_accuracy"]
+    val_loss = original_history.history["val_loss"]
+
+    # Combine original history with new history
+    total_acc = acc + new_history.history["accuracy"]
+    total_loss = loss + new_history.history["loss"]
+
+    total_val_acc = val_acc + new_history.history["val_accuracy"]
+    total_val_loss = val_loss + new_history.history["val_loss"]
+
+    # Create a stylish plot
+    plt.figure(figsize=(12, 8))
+    plt.suptitle("BEFORE FINE TUNING AND AFTER FINE TUNING",
+                 fontsize=16,
+                 fontweight="bold",
+                 y=1.03,
+                 color="red")
+
+    # Training and Validation Accuracy
+    plt.subplot(2, 1, 1)
+    plt.plot(total_acc, label='Training Accuracy', color='green')
+    plt.plot(total_val_acc, label='Validation Accuracy', color='blue')
+    plt.axvline(initial_epochs, color='gray', linestyle='--', label='Start Fine Tuning', linewidth=2)
+    plt.xticks(np.arange(1, len(total_acc),1))
+    plt.legend(loc='lower right')
+    plt.title('Training and Validation Accuracy')
+    plt.grid(True, linestyle='--', alpha=0.6)
+
+    # Training and Validation Loss
+    plt.subplot(2, 1, 2)
+    plt.plot(total_loss, label='Training Loss', color='red')
+    plt.plot(total_val_loss, label='Validation Loss', color='purple')
+    plt.axvline(initial_epochs, color='gray', linestyle='--', label='Start Fine Tuning', linewidth=2)
+    plt.xticks(np.arange(1, len(total_acc),1))
+    plt.legend(loc='upper right')
+    plt.title('Training and Validation Loss')
+    plt.xlabel('Epoch')
+    plt.grid(True, linestyle='--', alpha=0.6)
+
+    # Show the plot
+    plt.tight_layout()
+    plt.show()
+
+
+def visualize_image_pairs(dataframe, num_pairs=5):
+
+    """
+    
+    Visualizes pairs of images based on their ground truth and predicted labels from a DataFrame.
+
+    Args:
+    dataframe (pd.DataFrame): A DataFrame containing columns: 'File Path', 'Ground Truth Label', 'Predicted Label'.
+    num_pairs (int, optional): The number of image pairs to visualize. Default is 5.
+
+    Returns:
+    None: Displays image pairs using Matplotlib.
+
+    Example Usage:
+    visualize_image_pairs(sorted_df, num_pairs=5)
+
+    This function filters the input DataFrame to include only rows with different ground truth and predicted labels. It then randomly selects a specified number of image pairs and displays them in subplots. Each pair consists of an original image based on the ground truth label and a random predicted image based on the predicted label.
+
+    The 'File Path' column in the DataFrame should contain the file paths to the images, 'Ground Truth Label' represents the true labels, and 'Predicted Label' contains the predicted labels.
+
+    """
+
+    # Filter the DataFrame to include only rows with different labels
+    different_labels_df = dataframe[dataframe['Ground Truth Label'] != dataframe['Predicted Label']]
+
+    # Randomly select rows from the filtered DataFrame
+    random_rows = different_labels_df.sample(num_pairs)
+
+    # Create subplots to display image pairs
+    fig, axes = plt.subplots(num_pairs, 2, figsize=(10, 15))
+
+    for i, (_, row) in enumerate(random_rows.iterrows()):
+        ground_truth_file_path = row['File Path']
+        ground_truth_label = row['Ground Truth Label']
+        predicted_label = row['Predicted Label']
+
+        # Load and display the ground truth image
+        ground_truth_image = plt.imread(ground_truth_file_path)
+        axes[i, 0].imshow(ground_truth_image)
+        axes[i, 0].set_title(f'Original: {ground_truth_label}',color = "green")
+        axes[i, 0].axis('off')
+
+        # Find a random predicted image based on the predicted label
+        predicted_rows = different_labels_df[different_labels_df['Predicted Label'] == predicted_label]
+        random_row = random.choice(predicted_rows.index)
+        predicted_file_path = different_labels_df.loc[random_row, 'File Path']
+
+        # Load and display the predicted image
+        predicted_image = plt.imread(predicted_file_path)
+        axes[i, 1].imshow(predicted_image)
+        axes[i, 1].set_title(f'Predicted: {predicted_label},probability: {round(max_probability,2)}',color = "red")
+        axes[i, 1].axis('off')
+
+    plt.show()
+
 # GET IMAGE FROM THE WEB:
 
 def download_image(url):
@@ -235,33 +409,6 @@ def download_image(url):
     else:
         print("Failed to download the image. Check the URL.")
         
-        
-def plot_confusion_matrix(y_true, y_pred):
-    
-    """
-    Generate a confusion matrix plot based on the true labels and predicted labels.
-
-    Parameters:
-    - y_true: The true labels.
-    - y_pred: The predicted labels.
-
-    Returns:
-    None
-    """
-    
-    # Compute the confusion matrix
-    cf_matrix = confusion_matrix(y_true, y_pred)
-
-    # Create a heatmap
-    plt.figure(figsize=(8, 6))
-    sns.heatmap(cf_matrix, annot=True, fmt='d', cmap='Blues')
-
-    # Add labels and title
-    plt.xlabel('Predicted')
-    plt.ylabel('Actual')
-    plt.title('Confusion Matrix')
-    # Show the plot
-    plt.show()
     
 def unzip_data(filename):
     
