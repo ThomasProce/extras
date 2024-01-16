@@ -18,6 +18,7 @@ import seaborn as sns
 from sklearn.metrics import confusion_matrix
 import tensorflow_hub as hub
 import math
+import cv2
 
 
 # PLOTTING FUCTIONS
@@ -430,3 +431,32 @@ def unzip_data(filename):
     zip_ref.extractall()
     zip_ref.close()
     
+    
+# display image using openCV2
+
+import cv2
+
+def display_image(title, image):
+    """
+    Display an image with the given title.
+
+    Parameters:
+    - title (str): The title of the image window.
+    - image (numpy.ndarray): The image to be displayed.
+
+    Returns:
+    - None
+    """
+    cv2.imshow(title, image)
+
+    while True:
+        # Wait for a key event with a delay of 1 millisecond
+        key = cv2.waitKey(1) & 0xFF
+
+        # Check if the pressed key is 'q'
+        if key == ord('q'):
+            cv2.destroyAllWindows()
+            break  # Exit the loop if 'q' is pressed
+
+    # Explicitly wait for a short time before exiting the script
+    cv2.waitKey(1)
