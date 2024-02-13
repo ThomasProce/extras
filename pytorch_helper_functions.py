@@ -335,3 +335,10 @@ def create_writer(experiment_name: str,
     print(f"Creating summary writer in {log_dir}...")
     writer = SummaryWriter(log_dir=log_dir)
     return writer
+
+def set_seeds(seed: int=42):
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    # set a fixed value for the hash seed
+    os.environ['PYTHONHASHSEED'] = str(seed)
